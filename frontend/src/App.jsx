@@ -15,7 +15,7 @@ function App() {
     setDecision(null)
 
     try {
-      const response = await apiClient.post('/decision', {
+      const response = await apiClient.post('/public/decision', {
         personalCode,
         loanAmount: Number(loanAmount),
         loanPeriod: Number(loanPeriod)

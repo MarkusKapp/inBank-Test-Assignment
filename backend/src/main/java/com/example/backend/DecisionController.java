@@ -12,7 +12,7 @@ public class DecisionController {
 
     private final DecisionService decisionService;
 
-    @PostMapping("/decision")
+    @PostMapping("/public/decision")
     public ResponseEntity<DecisionResponse> getDecision(@Valid @RequestBody DecisionRequest request) {
         return ResponseEntity.ok(decisionService.calculateDecision(request));
     }
