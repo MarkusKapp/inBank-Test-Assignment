@@ -49,6 +49,7 @@ function App() {
           onChange={(e) => setLoanAmount(e.target.value)}
           min="2000"
           max="10000"
+          step="100"
           required
         />
 
