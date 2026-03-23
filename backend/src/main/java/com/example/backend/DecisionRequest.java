@@ -8,6 +8,7 @@ import lombok.Data;
 public class DecisionRequest {
 
     @NotBlank(message = "Personal code is required.")
+    @Pattern(regexp = "^\\d{11}$", message = "Personal code must constitute of 11 digits.")
     private String personalCode;
 
     @NotNull(message = "Loan amount is required.")
@@ -20,4 +21,3 @@ public class DecisionRequest {
     @Max(value = LoanConstraints.MAX_LOAN_PERIOD, message = "Maximum loan period is 60 months.")
     private Integer loanPeriod;
 }
-

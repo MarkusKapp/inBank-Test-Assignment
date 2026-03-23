@@ -221,6 +221,21 @@ class DecisionControllerIntegrationTest {
     }
 
     @Test
+    void shouldReturn400WhenPersonalCodeIsInvalidFormat() throws Exception {
+        mockMvc.perform(post("/api/public/decision")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "personalCode": "123",
+                            "loanAmount": 5000,
+                            "loanPeriod": 24
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Personal code must constitute of 11 digits."));
+    }
+
+    @Test
     void shouldReturn400WhenBodyIsEmpty() throws Exception {
         mockMvc.perform(post("/api/public/decision")
                         .contentType(MediaType.APPLICATION_JSON)
