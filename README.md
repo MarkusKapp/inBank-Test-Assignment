@@ -5,12 +5,10 @@ This project is a decision engine which takes in a personal identification code,
 
 The application consists of a Spring Boot backend and a React frontend.
 
-## Prerequisites
-- Java 21 or later
-- Node.js (v18 or later recommended)
-- npm or yarn
 
 ## Getting Started
+
+#### Clone the repository to your local machine.
 
 ### Backend Setup
 
