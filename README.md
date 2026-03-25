@@ -13,11 +13,19 @@ The application consists of a Spring Boot backend and a React frontend.
 ### Backend Setup
 
 1. Navigate to the `backend` directory:
-   ```bash
+   ```
    cd backend
    ```
 
 2. Build and run the application using Gradle wrapper:
+
+If you are on MacOs also run this command before:
+
+   ```
+   chmod +x ./gradlew
+   ```
+
+Otherwise, simply run:
 
    ```
    ./gradlew bootRun
