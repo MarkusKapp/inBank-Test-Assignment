@@ -8,11 +8,13 @@ function App() {
   const [loanPeriod, setLoanPeriod] = useState(12)
   const [decision, setDecision] = useState(null)
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setDecision(null)
+    setIsSubmitting(true)
 
     try {
       const response = await apiClient.post('public/decision', {
@@ -23,60 +25,103 @@ function App() {
       setDecision(response.data)
     } catch (err) {
       console.error(err)
-      setError('Failed to fetch decision. Please try again.')
+      if (err.response && err.response.data && err.response.data.message) {
+        // Backend returns a DecisionResponse with a message on error
+        setError(err.response.data.message)
+      } else {
+        setError('Failed to fetch decision. Please try again.')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   return (
     <main className="app">
-      <h1>Loan Decision</h1>
+      <div className="shell">
+        <header className="hero">
+          <h1>Loan Decision</h1>
+        </header>
 
-      <form className="form" onSubmit={handleSubmit}>
-        <label htmlFor="personalCode">Personal Code</label>
-        <input
-          id="personalCode"
-          type="text"
-          value={personalCode}
-          onChange={(e) => setPersonalCode(e.target.value)}
-          required
-        />
+        <section className="panel">
+          <form className="form" onSubmit={handleSubmit}>
+            <div className="field">
+              <label htmlFor="personalCode">Personal Code</label>
+              <input
+                  id="personalCode"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={11}
+                  value={personalCode}
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value)) {
+                      setPersonalCode(e.target.value);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value.length !== 11) {
+                      e.target.setCustomValidity("Personal code must be exactly 11 digits.");
+                    } else {
+                      e.target.setCustomValidity("");
+                    }
+                  }}
+                  onInput={(e) => e.target.setCustomValidity("")}
+                  placeholder="Enter your personal code"
+                  required
+              />
+            </div>
 
-        <label htmlFor="loanAmount">Loan Amount (EUR)</label>
-        <input
-          id="loanAmount"
-          type="number"
-          value={loanAmount}
-          onChange={(e) => setLoanAmount(e.target.value)}
-          min="2000"
-          max="10000"
-          step="100"
-          required
-        />
+            <div className="field">
+              <label htmlFor="loanAmount">Loan Amount (EUR)</label>
+              <input
+                id="loanAmount"
+                type="number"
+                value={loanAmount}
+                onChange={(e) => setLoanAmount(e.target.value)}
+                min="2000"
+                max="10000"
+                step="100"
+                required
+              />
+            </div>
 
-        <label htmlFor="loanPeriod">Loan Period (months)</label>
-        <input
-          id="loanPeriod"
-          type="number"
-          value={loanPeriod}
-          onChange={(e) => setLoanPeriod(e.target.value)}
-          min="12"
-          max="60"
-          required
-        />
+            <div className="field">
+              <label htmlFor="loanPeriod">Loan Period (months)</label>
+              <input
+                id="loanPeriod"
+                type="number"
+                value={loanPeriod}
+                onChange={(e) => setLoanPeriod(e.target.value)}
+                min="12"
+                max="60"
+                required
+              />
+            </div>
 
-        <button type="submit">Get Decision</button>
-      </form>
+            <button type="submit" className="primaryButton" disabled={isSubmitting}>
+              {isSubmitting ? 'Evaluating...' : 'Get Decision'}
+            </button>
+          </form>
 
-      {error && <p className="error">{error}</p>}
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
 
-      {decision && (
-        <section className="result">
-          <h2>{decision.approved ? 'Approved' : 'Denied'}</h2>
-          <p>Amount: {decision.approvedAmount} EUR</p>
-          <p>Period: {decision.approvedPeriod} months</p>
-          {decision.message && <p>{decision.message}</p>}
+          {decision && (
+            <section
+              className={`result ${decision.approved ? 'approved' : 'denied'}`}
+              aria-live="polite"
+            >
+              <h2>{decision.approved ? 'Approved' : 'Denied'}</h2>
+              <p>Amount: {decision.approvedAmount} EUR</p>
+              <p>Period: {decision.approvedPeriod} months</p>
+              {decision.message && <p>{decision.message}</p>}
+            </section>
+          )}
         </section>
-      )}
+      </div>
     </main>
   )
 }
