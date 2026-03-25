@@ -48,15 +48,6 @@ The application consists of a Spring Boot backend and a React frontend.
 
    **Note:** If port 5173 is in use, Vite will automatically use the next available port (e.g., 5174). The README assumes the default, but check your terminal.
 
-### Running Tests
-
-To run the backend tests:
-
-**Linux/macOS/Windows:**
-```bash
-./gradlew test
-```
-
 ## Usage
 
 1. Open your browser and go to the frontend URL (e.g., `http://localhost:5173`).
@@ -78,3 +69,42 @@ The following personal codes are hardcoded for testing purposes:
 - Maximum loan amount: 10000 €
 - Minimum loan period: 12 months
 - Maximum loan period: 60 months
+
+## Project Decisions & Thought Process
+
+### Technology Stack
+- **Backend:** I chose Spring Boot for the backend because of its ease of setting up RESTful APIs, and strong support for validation and exception handling.
+- **Frontend:** I've had more experience with Vue in the past, but chose React for this project to diversify my skill set and learn more about different frontend frameworks.
+- **Build Tools:** Used Gradle for the backend to manage dependencies and build tasks, and Vite for the frontend.
+
+
+### Architecture & Design
+I followed a standard layered architecture to separate concerns and ensure maintainability:
+- **Controller Layer (`DecisionController`):** Handles incoming HTTP requests and responses. It relies on DTOs (`DecisionRequest`, `DecisionResponse`) to structure data transfer and enforce validation rules.
+- **Service Layer (`DecisionService`):** Contains the core business logic. This is where the credit score calculation and decision-making happen.
+- **Exception Handling:** Implemented a global exception handler (`GlobalExceptionHandler`) using `@RestControllerAdvice`. This ensures that validation errors (e.g., invalid personal code format) or business exceptions are caught and returned to the frontend in a consistent, user-friendly JSON format, rather than exposing raw stack traces.
+- 
+
+### Key Implementation Details
+1.  **Validation:** Input validation is handled using Validation annotations (`@NotNull`, `@Min`, `@Max`, `@Pattern`) directly on the request DTO along with `@Valid` on the controller method parameter. This ensures invalid data is rejected early. These checks are made in the frontend as well, but as these can be passed the main validation logic is in the backend.
+2.  **Decision Logic:** The task was not quite clear on some edge case scenarios on what the decision engine should do so in this example where:
+   - CreditModifier is 100
+   - Loan amount is 3000
+   - Loan period is 12 months
+
+whether it should approve the loan at 2000 with a period of 20 months or try to match the loan amount at 3000 and 30 months.
+
+I implemented the logic to try to match the loan amount first, and if it cannot be matched, then try to match the loan period. If neither can be matched, then the loan is rejected. This approach prioritizes meeting the customer's requested amount while still trying to find a suitable period if the amount cannot be met.
+
+3.  **Frontend Integration:** The frontend uses `axios` for API calls. I implemented dynamic error handling to display backend validation messages directly to the user (e.g., "Personal code must constitute of 11 digits").
+4.  **Loan Constraints:** Created a separate `LoanConstraints` class to centralize the minimum and maximum values for loan amount and period. This makes it easier to maintain and update these constraints in the future without having to search through the codebase.
+5.  **Logging:** Added logging statements in the service layer and exception handling to trace the decision-making process and debug any issues that arise during execution.
+
+### Testing
+- **Unit Tests:** Focused on `DecisionService` to verify all branching logic (approval, rejection, finding new periods/amounts).
+- **Integration Tests:** `DecisionControllerIntegrationTest` ensures the API endpoints work correctly with the service layer and validation rules.
+
+
+### What is one thing you would improve about the take home assignment and how would you improve it?
+- Making the task more specific on the expected behavior of the decision engine in edge cases.
+- Providing more detail on whether the focus is more on backend logic, frontend implementation, or both.
