@@ -25,7 +25,7 @@ function App() {
       setDecision(response.data)
     } catch (err) {
       console.error(err)
-      if (err.response && err.response.data && err.response.data.message) {
+      if (err.response?.data?.message) {
         // Backend returns a DecisionResponse with a message on error
         setError(err.response.data.message)
       } else {
@@ -59,10 +59,10 @@ function App() {
                     }
                   }}
                   onBlur={(e) => {
-                    if (e.target.value.length !== 11) {
-                      e.target.setCustomValidity("Personal code must be exactly 11 digits.");
-                    } else {
+                    if (e.target.value.length === 11) {
                       e.target.setCustomValidity("");
+                    } else {
+                      e.target.setCustomValidity("Personal code must be exactly 11 digits.");
                     }
                   }}
                   onInput={(e) => e.target.setCustomValidity("")}

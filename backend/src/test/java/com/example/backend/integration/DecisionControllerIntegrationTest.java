@@ -14,12 +14,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class DecisionControllerIntegrationTest {
 
+    private static final String DECISION_URL = "/api/public/decision";
+    private static final String APPROVED = "$.approved";
+    private static final String APPROVED_AMOUNT = "$.approvedAmount";
+    private static final String APPROVED_PERIOD = "$.approvedPeriod";
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void shouldApproveWithHighCreditModifier() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -29,14 +34,14 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedAmount").value(10000.0))
-                .andExpect(jsonPath("$.approvedPeriod").value(24));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_AMOUNT).value(10000.0))
+                .andExpect(jsonPath(APPROVED_PERIOD).value(24));
     }
 
     @Test
     void shouldApproveWithMediumCreditModifier() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -46,14 +51,14 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedAmount").value(7200.0))
-                .andExpect(jsonPath("$.approvedPeriod").value(24));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_AMOUNT).value(7200.0))
+                .andExpect(jsonPath(APPROVED_PERIOD).value(24));
     }
 
     @Test
     void shouldExtendPeriodWhenCreditScoreLow() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -63,13 +68,13 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedPeriod").value(60));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_PERIOD).value(60));
     }
 
     @Test
     void shouldFallBackToMaxPeriodWithReducedAmount() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -79,14 +84,14 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedAmount").value(6000.0))
-                .andExpect(jsonPath("$.approvedPeriod").value(60));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_AMOUNT).value(6000.0))
+                .andExpect(jsonPath(APPROVED_PERIOD).value(60));
     }
 
     @Test
     void shouldFindSuitablePeriodWhenExtensionIsEnough() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -96,14 +101,14 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedAmount").value(2500.0))
-                .andExpect(jsonPath("$.approvedPeriod").value(25));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_AMOUNT).value(2500.0))
+                .andExpect(jsonPath(APPROVED_PERIOD).value(25));
     }
 
     @Test
     void shouldApproveExactMaxAmountWhenScoreSufficient() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -113,14 +118,14 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedAmount").value(10000.0))
-                .andExpect(jsonPath("$.approvedPeriod").value(60));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_AMOUNT).value(10000.0))
+                .andExpect(jsonPath(APPROVED_PERIOD).value(60));
     }
 
     @Test
     void shouldApproveExactMinAmountWhenScoreSufficient() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -130,14 +135,14 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(true))
-                .andExpect(jsonPath("$.approvedAmount").value(10000.0)) // Current logic returns max
-                .andExpect(jsonPath("$.approvedPeriod").value(12));
+                .andExpect(jsonPath(APPROVED).value(true))
+                .andExpect(jsonPath(APPROVED_AMOUNT).value(10000.0)) // Current logic returns max
+                .andExpect(jsonPath(APPROVED_PERIOD).value(12));
     }
 
     @Test
     void shouldDenyLoanForDebtCase() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -147,13 +152,13 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.approved").value(false))
+                .andExpect(jsonPath(APPROVED).value(false))
                 .andExpect(jsonPath("$.message").value("Loan denied due to debt."));
     }
 
     @Test
     void shouldReturn400WhenAmountBelowMinimum() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -167,7 +172,7 @@ class DecisionControllerIntegrationTest {
 
     @Test
     void shouldReturn400WhenAmountAboveMaximum() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -181,7 +186,7 @@ class DecisionControllerIntegrationTest {
 
     @Test
     void shouldReturn400WhenPeriodBelowMinimum() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -195,7 +200,7 @@ class DecisionControllerIntegrationTest {
 
     @Test
     void shouldReturn400WhenPeriodAboveMaximum() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -209,7 +214,7 @@ class DecisionControllerIntegrationTest {
 
     @Test
     void shouldReturn400WhenPersonalCodeMissing() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -222,7 +227,7 @@ class DecisionControllerIntegrationTest {
 
     @Test
     void shouldReturn400WhenPersonalCodeIsInvalidFormat() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
@@ -232,12 +237,12 @@ class DecisionControllerIntegrationTest {
                         }
                         """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Personal code must constitute of 11 digits."));
+                .andExpect(jsonPath("$.message").value("Personal code must consist of 11 digits."));
     }
 
     @Test
     void shouldReturn400WhenBodyIsEmpty() throws Exception {
-        mockMvc.perform(post("/api/public/decision")
+        mockMvc.perform(post(DECISION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
