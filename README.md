@@ -25,6 +25,17 @@ The application consists of a Spring Boot backend and a React frontend.
 
    **Note:** The command will stay running (showing ~80% execution in Gradle) to keep the server active. This is expected and you should not close this terminal. Open a new terminal for other commands.
 
+   **Troubleshooting:**
+   If you encounter the error `ERROR: JAVA_HOME is not set`, it means your terminal cannot locate your Java installation.
+   
+   **Windows PowerShell Temporary Fix:**
+   Run the following command (adjusting the path to your JDK version) before `bootRun`:
+   ```powershell
+   # Example for IntelliJ-installed JDK:
+   $env:JAVA_HOME = "$env:USERPROFILE\.jdks\ms-21.0.8"
+   ./gradlew bootRun
+   ```
+
 ### Frontend Setup
 
 1. Open a new terminal and navigate to the `frontend` directory:
